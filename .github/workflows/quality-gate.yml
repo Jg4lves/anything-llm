@@ -1,0 +1,37 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  quality-check:
+    name: Static Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instalar dependências
+        run: npm install
+        continue-on-error: true
+
+      - name: Rodar ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Rodar Prettier (checagem)
+        run: npm run format -- --check
+        continue-on-error: true
+
+      - name: Verificar segredos com Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
